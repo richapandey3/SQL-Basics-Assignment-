@@ -1,0 +1,4 @@
+SELECT o.order_id, c.customer_name, p.product_name
+FROM Products p
+LEFT JOIN Orders o ON p.product_id = o.product_id
+LEFT JOIN Customers c ON o.customer_id = c.customer_id;

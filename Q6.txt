@@ -1,0 +1,9 @@
+You can modify the products table using ALTER TABLE to add the missing constraints.
+
+Step 1: Add Primary Key to product_id
+ALTER TABLE products
+ADD CONSTRAINT pk_product_id PRIMARY KEY (product_id);
+
+Step 2: Add Default Value to price
+ALTER TABLE products
+ALTER COLUMN price SET DEFAULT 50.00;

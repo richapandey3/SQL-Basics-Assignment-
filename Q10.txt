@@ -1,0 +1,4 @@
+SELECT o.order_id, c.customer_name, od.quantity
+FROM Orders o
+INNER JOIN Customers c ON o.customer_id = c.customer_id
+INNER JOIN OrderDetails od ON o.order_id = od.order_id;

@@ -1,0 +1,109 @@
+1. First Normal Form (1NF)
+Violation: A table like payment could violate 1NF if it had multiple payment amounts in one row (e.g., amount1, amount2).
+Fix: Ensure atomicity—each column should hold a single value. Create one row per payment.
+
+2. Second Normal Form (2NF)
+Table: A hypothetical table with composite keys, like a junction table (e.g., film_actor) with extra attributes (say film_actor_notes).
+Check: If any non-key column depends only on part of the composite key, it violates 2NF.
+Fix: Move the partially dependent column to a new table with the correct dependency.
+
+3. Third Normal Form (3NF)
+Violation: Imagine a table customer with fields: store_id, store_address, etc.
+Problem: store_address is transitively dependent on customer_id via store_id.
+Fix: Move store_address to a separate store table. Keep only store_id in customer.
+
+4. Normalization Example (to 2NF)
+Unnormalized table:
+RentalSummary(customer_id, customer_name, film_id, film_title, rental_date)
+
+1NF: Make sure no multi-value attributes (done).
+2NF: customer_name depends only on customer_id ⇒ move to a separate table.
+Now:
+
+Customer(customer_id, customer_name)
+
+Rental(customer_id, film_id, rental_date)
+
+Film(film_id, film_title)
+
+
+
+5. CTE: Actor and Film Count
+WITH ActorFilmCount AS (
+  SELECT a.actor_id, a.first_name, a.last_name, COUNT(fa.film_id) AS film_count
+  FROM actor a
+  JOIN film_actor fa ON a.actor_id = fa.actor_id
+  GROUP BY a.actor_id
+)
+SELECT * FROM ActorFilmCount;
+
+
+6. CTE with Joins: Film and Language
+WITH FilmLanguage AS (
+  SELECT f.title, l.name AS language, f.rental_rate
+  FROM film f
+  JOIN language l ON f.language_id = l.language_id
+)
+SELECT * FROM FilmLanguage;
+
+
+7. CTE for Aggregation: Revenue per Customer
+WITH CustomerRevenue AS (
+  SELECT customer_id, SUM(amount) AS total_revenue
+  FROM payment
+  GROUP BY customer_id
+)
+SELECT * FROM CustomerRevenue;
+
+
+8. CTE with Window Function: Rank Films
+WITH RankedFilms AS (
+  SELECT title, rental_duration,
+         RANK() OVER (ORDER BY rental_duration DESC) AS rank
+  FROM film
+)
+SELECT * FROM RankedFilms;
+
+
+9. CTE and Filtering: Customers with > 2 Rentals
+WITH FrequentRenters AS (
+  SELECT customer_id, COUNT(*) AS rentals
+  FROM rental
+  GROUP BY customer_id
+  HAVING COUNT(*) > 2
+)
+SELECT c.*
+FROM customer c
+JOIN FrequentRenters fr ON c.customer_id = fr.customer_id;
+
+
+10. CTE for Date Calculations: Monthly Rentals
+WITH MonthlyRentals AS (
+  SELECT DATE_FORMAT(rental_date, '%Y-%m') AS month, COUNT(*) AS rentals
+  FROM rental
+  GROUP BY month
+)
+SELECT * FROM MonthlyRentals;
+
+
+11. CTE with Self-Join: Actor Pairs in Same Film
+WITH ActorPairs AS (
+  SELECT fa1.film_id, fa1.actor_id AS actor1, fa2.actor_id AS actor2
+  FROM film_actor fa1
+  JOIN film_actor fa2 
+    ON fa1.film_id = fa2.film_id AND fa1.actor_id < fa2.actor_id
+)
+SELECT * FROM ActorPairs;
+
+
+12. Recursive CTE: Reporting Chain
+WITH RECURSIVE StaffHierarchy AS (
+  SELECT staff_id, first_name, last_name, reports_to
+  FROM staff
+  WHERE staff_id = 1  -- change this to the manager’s ID
+  UNION ALL
+  SELECT s.staff_id, s.first_name, s.last_name, s.reports_to
+  FROM staff s
+  JOIN StaffHierarchy sh ON s.reports_to = sh.staff_id
+)
+SELECT * FROM StaffHierarchy;

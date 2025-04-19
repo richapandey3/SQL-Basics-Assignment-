@@ -1,0 +1,12 @@
+When you insert, update, or delete data that violates a constraint, the database rejects the operation and returns an error. This protects data integrity.
+
+Consequences of Violating Constraints:
+Insert: Inserting NULL into a NOT NULL column → Error
+
+Update: Changing a value to a duplicate in a UNIQUE column → Error
+
+Delete: Deleting a row referenced by a FOREIGN KEY → Error
+
+Example
+ERROR:  null value in column "emp_name" violates not-null constraint
+DETAIL:  Failing row contains (101, null, 25, john@example.com, 30000).

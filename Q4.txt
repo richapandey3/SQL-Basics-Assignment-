@@ -1,0 +1,10 @@
+To add or remove constraints on an existing table, use the ALTER TABLE command.
+ALTER TABLE employees
+ADD CONSTRAINT chk_age CHECK (age >= 18);
+
+
+Remove a Constraint:
+ALTER TABLE employees
+DROP CONSTRAINT chk_age;
+
+

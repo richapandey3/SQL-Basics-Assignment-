@@ -1,0 +1,145 @@
+================================
+        SQL_Commands
+================================
+
+
+1. Identify the Primary Keys and Foreign Keys in Maven Movies DB. Discuss the Differences
+Primary Key: A primary key uniquely identifies each record in a table. It cannot contain NULL values.
+
+Example: In the Customers table, the customer_id could be a primary key.
+
+Foreign Key: A foreign key is a column or a group of columns used to establish and enforce a link between the data in two tables. It refers to the primary key of another table.
+
+Example: In the Orders table, the customer_id could be a foreign key referring to the customer_id in the Customers table.
+
+2. List All Details of Actors
+SELECT * FROM actors;
+
+3. List All Customer Information from DB
+SELECT * FROM customers;
+
+4. List Different Countries
+SELECT DISTINCT country FROM customers;
+
+5. Display All Active Customers
+SELECT * FROM customers WHERE active = 1;
+
+6. List All Rental IDs for Customer with ID 1
+SELECT rental_id FROM rentals WHERE customer_id = 1;
+
+7. Display All the Films Whose Rental Duration is Greater Than 5
+SELECT * FROM films WHERE rental_duration > 5;
+
+8. List the Total Number of Films Whose Replacement Cost is Greater Than $15 and Less Than $20
+SELECT COUNT(*) FROM films WHERE replacement_cost > 15 AND replacement_cost < 20;
+
+9. Display the Count of Unique First Names of Actors
+SELECT COUNT(DISTINCT first_name) FROM actors;
+
+10. Display the First 10 Records from the Customer Table
+SELECT * FROM customers LIMIT 10;
+
+11. Display the First 3 Records from the Customer Table Whose First Name Starts with 'B'
+SELECT * FROM customers WHERE first_name LIKE 'B%' LIMIT 3;
+
+12. Display the Names of the First 5 Movies Which Are Rated as 'G'
+SELECT film_name FROM films WHERE rating = 'G' LIMIT 5;
+
+13. Find All Customers Whose First Name Starts with 'A'
+SELECT * FROM customers WHERE first_name LIKE 'A%';
+
+
+14. Find All Customers Whose First Name Ends with 'A'
+SELECT * FROM customers WHERE first_name LIKE '%A';
+
+15. Display the List of First 4 Cities Which Start and End with 'A'
+SELECT city FROM addresses WHERE city LIKE 'A%A' LIMIT 4;
+
+16. Find All Customers Whose First Name Has "NI" in Any Position
+SELECT * FROM customers WHERE first_name LIKE '%NI%';
+
+17. Find All Customers Whose First Name Has "R" in the Second Position
+SELECT * FROM customers WHERE first_name LIKE '_R%';
+
+18. Find All Customers Whose First Name Starts with 'A' and Are at Least 5 Characters in Length
+SELECT * FROM customers WHERE first_name LIKE 'A%' AND LENGTH(first_name) >= 5;
+
+19. Find All Customers Whose First Name Starts with 'A' and Ends with 'O'
+SELECT * FROM customers WHERE first_name LIKE 'A%O';
+
+20. Get the Films with PG and PG-13 Rating Using the IN Operator
+SELECT * FROM films WHERE rating IN ('PG', 'PG-13');
+
+21. Get the Films with Length Between 50 to 100 Using the BETWEEN Operator
+SELECT * FROM films WHERE length BETWEEN 50 AND 100;
+
+22. Get the Top 50 Actors Using the LIMIT Operator
+SELECT * FROM actors LIMIT 50;
+
+23. Get the Distinct Film IDs from the Inventory Table
+SELECT DISTINCT film_id FROM inventory;
+
+
+==========================================
+                JOINS
+==========================================
+
+
+Question 9: Movie Title and Customer Name Who Rented It
+SELECT f.title, c.first_name, c.last_name
+FROM rental r
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+JOIN customer c ON r.customer_id = c.customer_id;
+
+
+Question 10: Actors in the Film "Gone with the Wind"
+SELECT a.first_name, a.last_name
+FROM film f
+JOIN film_actor fa ON f.film_id = fa.film_id
+JOIN actor a ON fa.actor_id = a.actor_id
+WHERE f.title = 'Gone with the Wind';
+
+
+Question 11: Total Amount Spent by Each CustomerSELECT c.first_name, c.last_name, SUM(p.amount) AS total_spent
+FROM customer c
+JOIN payment p ON c.customer_id = p.customer_id
+GROUP BY c.customer_id;
+
+
+
+Question 12: Titles of Movies Rented by Customers in 'London'
+SELECT c.first_name, c.last_name, f.title
+FROM customer c
+JOIN address a ON c.address_id = a.address_id
+JOIN city ci ON a.city_id = ci.city_id
+JOIN rental r ON c.customer_id = r.customer_id
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+WHERE ci.city = 'London'
+ORDER BY c.customer_id, f.title;
+
+
+========================================
+    Advanced Joins and GROUP BY
+========================================
+
+
+Question 13: Top 5 Rented Movies with Rental Counts
+SELECT f.title, COUNT(r.rental_id) AS rental_count
+FROM film f
+JOIN inventory i ON f.film_id = i.film_id
+JOIN rental r ON i.inventory_id = r.inventory_id
+GROUP BY f.title
+ORDER BY rental_count DESC
+LIMIT 5;
+
+
+Question 14: Customers Who Rented from Both Stores (Store 1 & 2)
+SELECT customer_id
+FROM rental r
+JOIN inventory i ON r.inventory_id = i.inventory_id
+GROUP BY customer_id
+HAVING COUNT(DISTINCT i.store_id) = 2;
+
+

@@ -1,0 +1,32 @@
+The NOT NULL constraint is used to ensure that a column must always have a value—in other words, it cannot be left blank or undefined.
+
+Reasons to Use NOT NULL:
+Ensures Required Data is Always Present
+Example: In an employees table, the emp_name should never be empty—every employee must have a name.
+
+Supports Data Integrity
+Prevents accidental omission of critical information.
+
+Improves Query Reliability
+Operations like filtering, sorting, and joins behave more predictably when critical columns always contain values.
+
+Avoids Unexpected Errors
+Applications depending on that data won’t crash or misbehave due to missing values.
+
+
+ustification:
+A primary key is used to uniquely identify each record in a table.
+
+NULL means “unknown” or “not applicable,” and it cannot be used to guarantee uniqueness.
+
+Allowing NULL in a primary key would defeat its core purpose of uniquely identifying rows.
+
+That’s why, in SQL, a column defined as PRIMARY KEY is implicitly NOT NULL, even if you don’t explicitly write NOT NULL.
+
+
+
+Example 
+CREATE TABLE employees (
+    emp_id INTEGER PRIMARY KEY, -- implicitly NOT NULL
+    emp_name TEXT NOT NULL
+);

@@ -1,0 +1,23 @@
+Constraints are rules applied to database tables to enforce the validity, accuracy, and consistency of the data. They help ensure data integrity by restricting the types of data that can be inserted, updated, or deleted in a table.
+
+How Constraints Maintain Data Integrity
+Prevent invalid data entry
+Example: A CHECK constraint ensures age is not less than 18.
+
+Ensure unique records
+Example: A UNIQUE constraint prevents duplicate email addresses.
+
+Establish relationships between tables
+Example: A FOREIGN KEY ensures that a department ID in the employee table exists in the departments table.
+
+Avoid null or missing critical information
+Example: A NOT NULL constraint ensures the name field is always filled.
+
+Common Types of Constraints
+Constraint Type	Purpose	Example
+PRIMARY KEY	     Uniquely identifies each row in a table	      emp_id INTEGER PRIMARY KEY
+NOT NULL	     Ensures a column cannot have a NULL value	      emp_name TEXT NOT NULL
+UNIQUE	         Ensures all values in a column are different	  email TEXT UNIQUE
+CHECK	         Ensures the values meet a specific condition	  age INTEGER CHECK (age >= 18)
+DEFAULT	         Assigns a default value if none is provided	  salary DECIMAL DEFAULT 30000
+FOREIGN KEY	     Enforces referential integrity between tables	  dept_id INTEGER REFERENCES departments(dept_id)

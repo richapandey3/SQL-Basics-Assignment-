@@ -1,0 +1,142 @@
+1. Rank Customers by Total Rental Spending
+SELECT 
+  customer_id, 
+  first_name, 
+  last_name, 
+  SUM(amount) AS total_spent,
+  RANK() OVER (ORDER BY SUM(amount) DESC) AS spending_rank
+FROM customer
+JOIN payment USING(customer_id)
+GROUP BY customer_id;
+
+
+2. Cumulative Revenue per Film Over Time
+SELECT 
+  f.title,
+  p.payment_date,
+  SUM(p.amount) OVER (PARTITION BY f.film_id ORDER BY p.payment_date) AS cumulative_revenue
+FROM payment p
+JOIN rental r ON p.rental_id = r.rental_id
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id;
+
+
+3. Average Rental Duration for Each Film (Grouped by Similar Lengths)
+SELECT 
+  f.length,
+  f.title,
+  AVG(DATEDIFF(r.return_date, r.rental_date)) AS avg_duration
+FROM film f
+JOIN inventory i ON f.film_id = i.film_id
+JOIN rental r ON i.inventory_id = r.inventory_id
+GROUP BY f.length, f.title;
+
+
+4. Top 3 Films in Each Category by Rental Count
+SELECT *
+FROM (
+  SELECT 
+    c.name AS category,
+    f.title,
+    COUNT(r.rental_id) AS rental_count,
+    RANK() OVER (PARTITION BY c.name ORDER BY COUNT(r.rental_id) DESC) AS rank
+  FROM film f
+  JOIN film_category fc ON f.film_id = fc.film_id
+  JOIN category c ON fc.category_id = c.category_id
+  JOIN inventory i ON f.film_id = i.film_id
+  JOIN rental r ON i.inventory_id = r.inventory_id
+  GROUP BY c.name, f.title
+) AS ranked
+WHERE rank <= 3;
+
+
+5. Difference in Rental Count Between Each Customer and the Average
+SELECT 
+  customer_id,
+  COUNT(*) AS customer_rentals,
+  ROUND(AVG(COUNT(*)) OVER (), 2) AS avg_rentals,
+  COUNT(*) - ROUND(AVG(COUNT(*)) OVER (), 2) AS rental_difference
+FROM rental
+GROUP BY customer_id;
+
+
+6. Monthly Revenue Trend
+SELECT 
+  DATE_FORMAT(payment_date, '%Y-%m') AS month,
+  SUM(amount) AS monthly_revenue
+FROM payment
+GROUP BY month
+ORDER BY month;
+
+
+7. Top 20% Customers by Spending
+SELECT customer_id, first_name, last_name, total_spent
+FROM (
+  SELECT 
+    c.customer_id,
+    c.first_name,
+    c.last_name,
+    SUM(p.amount) AS total_spent,
+    NTILE(5) OVER (ORDER BY SUM(p.amount) DESC) AS percentile
+  FROM customer c
+  JOIN payment p ON c.customer_id = p.customer_id
+  GROUP BY c.customer_id
+) AS ranked
+WHERE percentile = 1;
+
+
+8. Running Total of Rentals per Category by Rental Count
+SELECT 
+  category,
+  rental_count,
+  SUM(rental_count) OVER (ORDER BY rental_count DESC) AS running_total
+FROM (
+  SELECT 
+    c.name AS category,
+    COUNT(r.rental_id) AS rental_count
+  FROM film f
+  JOIN film_category fc ON f.film_id = fc.film_id
+  JOIN category c ON fc.category_id = c.category_id
+  JOIN inventory i ON f.film_id = i.film_id
+  JOIN rental r ON i.inventory_id = r.inventory_id
+  GROUP BY c.name
+) AS category_rentals;
+
+
+9. Films Rented Less Than Average in Their Category
+WITH category_avg AS (
+  SELECT 
+    c.category_id,
+    AVG(rental_count) AS avg_rentals
+  FROM (
+    SELECT f.film_id, fc.category_id, COUNT(r.rental_id) AS rental_count
+    FROM film f
+    JOIN film_category fc ON f.film_id = fc.film_id
+    JOIN inventory i ON f.film_id = i.film_id
+    JOIN rental r ON i.inventory_id = r.inventory_id
+    GROUP BY f.film_id, fc.category_id
+  ) AS film_rentals
+  JOIN category c ON c.category_id = film_rentals.category_id
+  GROUP BY c.category_id
+)
+SELECT 
+  f.title, c.name AS category, COUNT(r.rental_id) AS rental_count
+FROM film f
+JOIN film_category fc ON f.film_id = fc.film_id
+JOIN category c ON fc.category_id = c.category_id
+JOIN inventory i ON f.film_id = i.film_id
+JOIN rental r ON i.inventory_id = r.inventory_id
+GROUP BY f.film_id, c.name, c.category_id
+HAVING COUNT(r.rental_id) < (
+  SELECT avg_rentals FROM category_avg WHERE category_avg.category_id = c.category_id
+);
+
+
+10. Top 5 Months with Highest Revenue
+SELECT 
+  DATE_FORMAT(payment_date, '%Y-%m') AS month,
+  SUM(amount) AS revenue
+FROM payment
+GROUP BY month
+ORDER BY revenue DESC
+LIMIT 5;
