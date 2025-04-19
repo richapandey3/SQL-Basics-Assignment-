@@ -1,0 +1,74 @@
+ #Questions 9 -
+ Display the title of the movie, customer s first name, and last name who rented it.
+ SELECT 
+    f.title AS movie_title,
+    c.first_name,
+    c.last_name
+FROM rental r
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+JOIN customer c ON r.customer_id = c.customer_id;
+
+#Question 10:
+ Retrieve the customer names along with the total amount they've spent on rentals.
+SELECT 
+    a.first_name,
+    a.last_name
+FROM actor a
+JOIN film_actor fa ON a.actor_id = fa.actor_id
+JOIN film f ON fa.film_id = f.film_id
+WHERE f.title = 'Gone with the Wind';
+
+# Question 11: Retrieve the customer names along with the total amount they've spent on rentals.
+ SELECT 
+    c.first_name,
+    c.last_name,
+    SUM(p.amount) AS total_spent
+FROM customer c
+JOIN payment p ON c.customer_id = p.customer_id
+JOIN rental r ON p.rental_id = r.rental_id
+GROUP BY c.customer_id, c.first_name, c.last_name;
+
+#Question 12:
+ List the titles of movies rented by each customer in a particular city (e.g., 'London').
+SELECT 
+    c.first_name,
+    c.last_name,
+    f.title
+FROM customer c
+JOIN address a ON c.address_id = a.address_id
+JOIN city ci ON a.city_id = ci.city_id
+JOIN rental r ON c.customer_id = r.customer_id
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+WHERE ci.city = 'London'
+ORDER BY c.last_name, c.first_name, f.title;
+
+###Advanced Joins and GROUP BY
+
+#Question 13:
+Display the top 5 rented movies along with the number of times they've been rented.
+SELECT 
+    f.title,
+    COUNT(r.rental_id) AS times_rented
+FROM film f
+JOIN inventory i ON f.film_id = i.film_id
+JOIN rental r ON i.inventory_id = r.inventory_id
+GROUP BY f.film_id, f.title
+ORDER BY times_rented DESC
+LIMIT 5;
+#Question 14:
+Determine the customers who have rented movies from both stores (store ID 1 and store ID 2).
+SELECT 
+    c.customer_id,
+    c.first_name,
+    c.last_name
+FROM customer c
+JOIN rental r ON c.customer_id = r.customer_id
+JOIN inventory i ON r.inventory_id = i.inventory_id
+GROUP BY c.customer_id, c.first_name, c.last_name
+HAVING COUNT(DISTINCT i.store_id) = 2;
+
+
+
+
